@@ -10,7 +10,7 @@ import (
 	imgui "github.com/AllenDang/cimgui-go"
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/keryose/ebiten-imgui/renderer"
+	"github.com/keyrose/ebiten-imgui/renderer"
 )
 
 func main() {

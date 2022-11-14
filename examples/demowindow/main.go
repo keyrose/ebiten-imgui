@@ -7,7 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/keryose/ebiten-imgui/renderer"
+	"github.com/keyrose/ebiten-imgui/renderer"
 )
 
 // Example with the main Demo window and ClipMask
