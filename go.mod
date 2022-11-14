@@ -1,4 +1,4 @@
-module github.com/keryose/ebiten-imgui
+module github.com/keyrose/ebiten-imgui
 
 go 1.19
 
