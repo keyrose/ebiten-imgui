@@ -1,3 +1,4 @@
+//go:build example
 // +build example
 
 package main
@@ -6,10 +7,10 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/gabstv/ebiten-imgui/renderer"
+	imgui "github.com/AllenDang/cimgui-go"
 	ebiten "github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	imgui "github.com/inkyblackness/imgui-go/v4"
+	"github.com/keryose/ebiten-imgui/renderer"
 )
 
 func main() {

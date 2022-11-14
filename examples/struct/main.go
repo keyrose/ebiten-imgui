@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/gabstv/ebiten-imgui/imcolor"
-	"github.com/gabstv/ebiten-imgui/renderer"
+	imgui "github.com/AllenDang/cimgui-go"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/inkyblackness/imgui-go/v4"
+	"github.com/keryose/ebiten-imgui/imcolor"
+	"github.com/keryose/ebiten-imgui/renderer"
 )
 
 func main() {

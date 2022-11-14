@@ -2,12 +2,13 @@ package renderer
 
 import (
 	"fmt"
+
 	"image"
 	"unsafe"
 
-	"github.com/gabstv/ebiten-imgui/internal/native"
+	imgui "github.com/AllenDang/cimgui-go"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/inkyblackness/imgui-go/v4"
+	"github.com/keryose/ebiten-imgui/internal/native"
 )
 
 // struct ImDrawVert
@@ -110,22 +111,23 @@ func vmultiply(v, vbuf []ebiten.Vertex, bmin, bmax image.Point) {
 	}
 }
 
-func getTexture(tex *imgui.RGBA32Image) *ebiten.Image {
-	n := tex.Width * tex.Height
-	srcPix := (*[1 << 28]uint8)(tex.Pixels)[: n*4 : n*4]
+func getTexture(pixels unsafe.Pointer, width int32, height int32, outBytesPerPixel int32) *ebiten.Image {
+
+	n := width * height
+	srcPix := (*[1 << 28]uint8)(pixels)[: n*4 : n*4]
 	pix := make([]uint8, n*4)
 	// Note: Ebiten expects colors in premultiplied-alpha form.
 	// However, the imgui library exports pixmaps in straight-alpha form.
 	// Also, not doing this modification in-place,
 	// as srcPix points right into an imgui-owned data structure.
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		alpha := uint16(srcPix[4*i+3])
-		pix[4*i] = uint8((uint16(srcPix[4*i]) * alpha + 127) / 255)
-		pix[4*i+1] = uint8((uint16(srcPix[4*i+1]) * alpha + 127) / 255)
-		pix[4*i+2] = uint8((uint16(srcPix[4*i+2]) * alpha + 127) / 255)
+		pix[4*i] = uint8((uint16(srcPix[4*i])*alpha + 127) / 255)
+		pix[4*i+1] = uint8((uint16(srcPix[4*i+1])*alpha + 127) / 255)
+		pix[4*i+2] = uint8((uint16(srcPix[4*i+2])*alpha + 127) / 255)
 		pix[4*i+3] = uint8(alpha)
 	}
-	img := ebiten.NewImage(tex.Width, tex.Height)
+	img := ebiten.NewImage(int(width), int(height))
 	img.ReplacePixels(pix)
 	return img
 }
@@ -157,18 +159,19 @@ func getIndices(ibuf unsafe.Pointer, iblen, isize int) []uint16 {
 }
 
 // Render the ImGui drawData into the target *ebiten.Image
-func Render(target *ebiten.Image, drawData imgui.DrawData, txcache TextureCache, dfilter ebiten.Filter) {
+func Render(target *ebiten.Image, drawData imgui.ImDrawData, txcache TextureCache, dfilter ebiten.Filter) {
 	render(target, nil, drawData, txcache, dfilter)
 }
 
 // RenderMasked renders the ImGui drawData into the target *ebiten.Image with ebiten.CompositeModeCopy for masking
-func RenderMasked(target *ebiten.Image, mask *ebiten.Image, drawData imgui.DrawData, txcache TextureCache, dfilter ebiten.Filter) {
+func RenderMasked(target *ebiten.Image, mask *ebiten.Image, drawData imgui.ImDrawData, txcache TextureCache, dfilter ebiten.Filter) {
 	render(target, mask, drawData, txcache, dfilter)
 }
 
-func render(target *ebiten.Image, mask *ebiten.Image, drawData imgui.DrawData, txcache TextureCache, dfilter ebiten.Filter) {
+func render(target *ebiten.Image, mask *ebiten.Image, drawData imgui.ImDrawData, txcache TextureCache, dfilter ebiten.Filter) {
 	targetw, targeth := target.Size()
-	if !drawData.Valid() {
+
+	if !drawData.GetValid() {
 		return
 	}
 
@@ -186,22 +189,23 @@ func render(target *ebiten.Image, mask *ebiten.Image, drawData imgui.DrawData, t
 	}
 
 	for _, clist := range drawData.CommandLists() {
-		var indexBufferOffset int
-		vertexBuffer, vertexLen := clist.VertexBuffer()
-		indexBuffer, indexLen := clist.IndexBuffer()
+		var indexBufferOffset uint32
+		vertexBuffer, vertexLen := clist.GetVertexBuffer()
+		indexBuffer, indexLen := clist.GetIndexBuffer()
 		vertices := getVertices(vertexBuffer, vertexLen, vertexSize, vertexOffsetPos, vertexOffsetUv, vertexOffsetCol)
 		vbuf := vcopy(vertices)
 		indices := getIndices(indexBuffer, indexLen, indexSize)
 		for _, cmd := range clist.Commands() {
-			ecount := cmd.ElementCount()
+			ecount := cmd.GetElemCount()
 			if cmd.HasUserCallback() {
 				cmd.CallUserCallback(clist)
 			} else {
-				clipRect := cmd.ClipRect()
-				texid := cmd.TextureID()
+				clipRect := cmd.GetClipRect()
+				texid := cmd.GetTextureId()
 				tx := txcache.GetTexture(texid)
 				vmultiply(vertices, vbuf, tx.Bounds().Min, tx.Bounds().Max)
 				if mask == nil || (clipRect.X == 0 && clipRect.Y == 0 && clipRect.Z == float32(targetw) && clipRect.W == float32(targeth)) {
+
 					target.DrawTriangles(vbuf, indices[indexBufferOffset:indexBufferOffset+ecount], tx, opt)
 				} else {
 					mask.Clear()

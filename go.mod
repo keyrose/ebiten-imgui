@@ -1,10 +1,10 @@
-module github.com/gabstv/ebiten-imgui
+module github.com/keryose/ebiten-imgui
 
-go 1.17
+go 1.19
 
 require (
+	github.com/AllenDang/cimgui-go v0.0.0-20221031064022-158164eb30c7
 	github.com/hajimehoshi/ebiten/v2 v2.3.1
-	github.com/inkyblackness/imgui-go/v4 v4.4.0
 )
 
 require (
