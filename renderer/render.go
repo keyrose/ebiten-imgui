@@ -8,7 +8,7 @@ import (
 
 	imgui "github.com/AllenDang/cimgui-go"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/keryose/ebiten-imgui/internal/native"
+	"github.com/keyrose/ebiten-imgui/internal/native"
 )
 
 // struct ImDrawVert
